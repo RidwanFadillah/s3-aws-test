@@ -2,7 +2,7 @@
 
 Aplikasi web sederhana ini memungkinkan pengguna untuk mengunggah, melihat, dan menghapus file dari bucket Amazon S3.
 
-![](https://placeholder.com/url-to-your-screenshot)
+![Sreenshot Aplikasi](./assets/1.png)
 
 ---
 
