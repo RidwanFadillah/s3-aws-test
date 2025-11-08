@@ -68,8 +68,8 @@ Aplikasi web sederhana ini memungkinkan pengguna untuk mengunggah, melihat, dan 
 
 1.  **Clone Repositori:**
     ```bash
-    git clone [URL_GITHUB_ANDA]
-    cd [nama-folder-proyek]
+    git clone https://github.com/RidwanFadillah/s3-aws-test.git
+    cd s3-aws-test/
     ```
 2.  **Install Dependensi:**
     ```bash
