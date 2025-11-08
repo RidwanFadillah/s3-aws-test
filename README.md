@@ -28,7 +28,7 @@ Aplikasi web sederhana ini memungkinkan pengguna untuk mengunggah, melihat, dan 
 
 ## Deploy ke Produksi (EC2)
 
-[cite_start]Ini adalah langkah-langkah yang diambil untuk men-deploy aplikasi ini di server produksi (sesuai laporan tugas ).
+Ini adalah langkah-langkah yang diambil untuk men-deploy aplikasi ini di server produksi (sesuai laporan tugas ).
 
 ### 1. Persiapan AWS
 
@@ -115,8 +115,8 @@ Untuk menjalankan aplikasi ini di komputer lokal (bukan di EC2):
 
 1.  **Clone repositori:**
     ```bash
-    git clone [URL_GITHUB_ANDA]
-    cd [nama-folder-proyek]
+    git clone https://github.com/RidwanFadillah/s3-aws-test.git
+    cd s3-aws-test/
     ```
 2.  **Install dependensi:**
     ```bash
