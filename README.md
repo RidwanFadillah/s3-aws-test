@@ -5,7 +5,6 @@ Aplikasi web sederhana ini memungkinkan pengguna untuk mengunggah, melihat, dan 
 [cite_start]Proyek ini dibuat untuk memenuhi tugas [cite: 119-123] [cite_start]yang membutuhkan aplikasi web yang di-hosting di **Amazon EC2** [cite: 121] [cite_start]dan menggunakan **Amazon S3** untuk penyimpanan file[cite: 121].
 
 ![](https://placeholder.com/url-to-your-screenshot)
-*(Ganti placeholder di atas dengan screenshot aplikasi Anda jika Anda mau)*
 
 ---
 
