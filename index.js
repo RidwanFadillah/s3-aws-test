@@ -14,11 +14,11 @@ const port = 3000;
 // --- ⚠️ Kredensial Anda ---
 // const YOUR_ACCESS_KEY_ID = '';
 // const YOUR_SECRET_ACCESS_KEY = '';
-const YOUR_REGION = 'YOUR_REGION';
-const YOUR_BUCKET_NAME = 'YOUR_BUCKET_NAME';
+const YOUR_REGION = 'YOUR_REGION'; // ganti dengan region bucket Anda
+const YOUR_BUCKET_NAME = 'YOUR_BUCKET_NAME'; // ganti dengan nama bucket Anda
 // ------------------------------------------
 
-// uncomment untuk menjalankan 
+// uncomment untuk menjalankan di lokal dengan kredensial di atas
 // const s3Client = new S3Client({
 //     region: YOUR_REGION,
 //     credentials: {
