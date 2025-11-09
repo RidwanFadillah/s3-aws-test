@@ -18,16 +18,125 @@
             --text-primary: #111827;
             --text-secondary: #6b7280;
             --border-color: #e5e7eb;
-            --accent-color: #3b82f6;
+            --gradient-from: #667eea;
+            --gradient-to: #764ba2;
         }
 
-        .dark {
-            --bg-primary: #111827;
-            --bg-secondary: #1f2937;
-            --text-primary: #f9fafb;
-            --text-secondary: #9ca3af;
-            --border-color: #374151;
-            --accent-color: #60a5fa;
+        .dark-mode {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--gradient-from) 0%, var(--gradient-to) 100%);
+        }
+
+        .bg-card {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+
+        .text-card {
+            color: var(--text-primary);
+        }
+
+        .text-muted {
+            color: var(--text-secondary);
+        }
+
+        /* Dark mode toggle switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e0;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+
+        .filter-btn {
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .search-input {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border-color);
+            transition: all 0.3s ease;
+            background-color: var(--bg-secondary);
+        }
+
+        .file-upload-area:hover,
+        .file-upload-area.drag-over {
+            border-color: #667eea;
+            background-color: var(--bg-primary);
+        }
+
+        .dark-mode .file-icon {
+            color: #64748b;
         }
 
         .drag-over {
@@ -93,40 +202,73 @@
         .badge-archive { background: linear-gradient(135deg, #ff9a56 0%, #ffecd2 100%); }
         .badge-code { background: linear-gradient(135deg, #21d4fd 0%, #b721ff 100%); }
         .badge-default { background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%); }
+
+        /* Bounce on hover */
+        .btn-bounce:hover {
+            animation: bounce 0.6s;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.4s ease-out;
+        }
     </style>
 </head>
-<body class="font-sans antialiased transition-colors duration-300" style="background-color: var(--bg-primary); color: var(--text-primary);">
+<body>
 
-    <!-- Dark Mode Toggle -->
-    <div class="fixed top-4 right-4 z-50">
-        <button id="darkModeToggle" class="p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110" style="background-color: var(--bg-secondary);">
-            <i class="fas fa-moon text-xl" style="color: var(--text-primary);"></i>
-        </button>
-    </div>
-
-    <div class="max-w-7xl mx-auto my-10 p-8">
-
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-5xl font-bold mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent animate-pulse">
-                <i class="fas fa-cloud-upload-alt"></i> CloudBox
-            </h1>
-            <p class="text-lg" style="color: var(--text-secondary);">Your Modern S3 Storage Manager</p>
+    <!-- Header/Navbar -->
+    <nav class="gradient-bg shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-cloud text-white text-3xl animate-pulse"></i>
+                    <h1 class="text-2xl font-bold text-white">CloudBox</h1>
+                </div>
+                <div class="flex items-center space-x-4 text-white">
+                    <div class="hidden sm:flex items-center space-x-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
+                        <i class="fas fa-database"></i>
+                        <span class="text-sm font-medium"><%= bucket %></span>
+                    </div>
+                    <!-- Dark Mode Toggle -->
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-sun text-yellow-300"></i>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="slider"></span>
+                        </label>
+                        <i class="fas fa-moon text-blue-200"></i>
+                    </div>
+                </div>
+            </div>
         </div>
+    </nav>
 
-        <!-- Toast Messages -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Flash Messages -->
         <% if (messages.error && messages.error.length > 0) { %>
-            <div class="toast bg-red-100 border-l-4 border-red-500 text-red-700 px-6 py-4 rounded-lg mb-6 shadow-lg" role="alert">
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 px-6 py-4 rounded-lg mb-6 animate-slide-in shadow-md">
                 <div class="flex items-center">
-                    <i class="fas fa-exclamation-circle mr-3 text-2xl"></i>
+                    <i class="fas fa-exclamation-circle text-2xl mr-3"></i>
                     <span class="font-medium"><%= messages.error[0] %></span>
                 </div>
             </div>
         <% } %>
+
         <% if (messages.success && messages.success.length > 0) { %>
-            <div class="toast bg-green-100 border-l-4 border-green-500 text-green-700 px-6 py-4 rounded-lg mb-6 shadow-lg" role="alert">
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-700 px-6 py-4 rounded-lg mb-6 animate-slide-in shadow-md">
                 <div class="flex items-center">
-                    <i class="fas fa-check-circle mr-3 text-2xl"></i>
+                    <i class="fas fa-check-circle text-2xl mr-3"></i>
                     <span class="font-medium"><%= messages.success[0] %></span>
                 </div>
             </div>
@@ -142,121 +284,136 @@
 
         <!-- Statistics Dashboard -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="stat-card p-6 rounded-xl shadow-lg text-white">
+            <div class="stat-card text-white p-6 rounded-xl shadow-lg card-hover">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm opacity-90">Total Files</p>
-                        <p class="text-3xl font-bold" id="totalFiles"><%= files.length %></p>
+                        <p class="text-white/80 text-sm font-medium">Total Files</p>
+                        <h3 class="text-3xl font-bold mt-1" id="totalFilesCount"><%= files.length %></h3>
                     </div>
-                    <i class="fas fa-file text-4xl opacity-50"></i>
+                    <i class="fas fa-file text-5xl text-white/30"></i>
                 </div>
             </div>
-            <div class="stat-card-2 p-6 rounded-xl shadow-lg text-white">
+
+            <div class="bg-card p-6 rounded-xl shadow-lg card-hover border">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm opacity-90">Total Size</p>
-                        <p class="text-3xl font-bold" id="totalSize">
+                        <p class="text-muted text-sm font-medium">Total Size</p>
+                        <h3 class="text-3xl font-bold text-card mt-1">
                             <%
-                                const totalBytes = files.reduce((sum, f) => sum + (f.Size || 0), 0);
-                                const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
+                                const totalSize = files.reduce((acc, f) => acc + (f.Size || 0), 0);
+                                const sizeInMB = (totalSize / 1024 / 1024).toFixed(2);
                             %>
-                            <%= totalMB %> MB
-                        </p>
+                            <%= sizeInMB %> MB
+                        </h3>
                     </div>
-                    <i class="fas fa-database text-4xl opacity-50"></i>
+                    <i class="fas fa-hdd text-5xl text-purple-200"></i>
                 </div>
             </div>
-            <div class="stat-card-3 p-6 rounded-xl shadow-lg text-white">
+
+            <div class="bg-card p-6 rounded-xl shadow-lg card-hover border">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm opacity-90">Images</p>
-                        <p class="text-3xl font-bold" id="imageCount">
+                        <p class="text-muted text-sm font-medium">Images</p>
+                        <h3 class="text-3xl font-bold text-card mt-1">
                             <%
-                                const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
-                                const imageCount = files.filter(f => imageExts.some(ext => f.Key.toLowerCase().endsWith(ext))).length;
+                                const imageCount = files.filter(f =>
+                                    f.Key.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)
+                                ).length;
                             %>
                             <%= imageCount %>
-                        </p>
+                        </h3>
                     </div>
-                    <i class="fas fa-image text-4xl opacity-50"></i>
+                    <i class="fas fa-images text-5xl text-purple-200"></i>
                 </div>
             </div>
         </div>
 
         <!-- Upload Section -->
-        <div class="p-8 rounded-xl shadow-xl mb-8" style="background-color: var(--bg-secondary);">
-            <h2 class="text-2xl font-bold mb-6 flex items-center">
-                <i class="fas fa-upload mr-3 text-blue-600"></i>
-                Upload Files
-            </h2>
+        <div class="bg-card rounded-xl shadow-lg p-8 mb-8 border">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-cloud-upload-alt text-3xl text-purple-600 mr-3"></i>
+                <h2 class="text-2xl font-bold text-card">Upload Files</h2>
+            </div>
 
             <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
-                <div id="dropZone" class="border-3 border-dashed rounded-xl p-12 text-center transition-all duration-300" style="border-color: var(--border-color);">
-                    <i class="fas fa-cloud-upload-alt text-6xl mb-4" style="color: var(--accent-color);"></i>
-                    <p class="text-xl font-semibold mb-2">Drag & Drop files here</p>
-                    <p class="mb-4" style="color: var(--text-secondary);">or click to select files (max 10 files)</p>
+                <div class="file-upload-area rounded-lg p-8 text-center cursor-pointer" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt text-6xl text-gray-400 mb-4"></i>
+                    <p class="text-lg font-semibold text-card mb-2">Drag & Drop files here</p>
+                    <p class="text-sm text-muted mb-4">or click to browse (max 10 files)</p>
+
                     <input
                         type="file"
                         name="files"
                         id="fileInput"
                         multiple
-                        accept="*/*"
                         class="hidden"
                     >
-                    <label for="fileInput" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg cursor-pointer transition-all duration-300 hover:scale-105">
-                        <i class="fas fa-folder-open mr-2"></i> Choose Files
-                    </label>
+
+                    <button
+                        type="button"
+                        onclick="document.getElementById('fileInput').click()"
+                        class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition duration-200 btn-bounce"
+                    >
+                        <i class="fas fa-folder-open mr-2"></i>
+                        Choose Files
+                    </button>
                 </div>
 
-                <div id="fileList" class="mt-4 space-y-2"></div>
-
-                <button
-                    type="submit"
-                    id="uploadBtn"
-                    class="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled
-                >
-                    <i class="fas fa-rocket mr-2"></i> Upload Files
-                </button>
+                <!-- Selected Files Preview -->
+                <div id="fileList" class="mt-4 hidden">
+                    <p class="text-sm font-semibold text-card mb-2">Selected Files:</p>
+                    <div id="fileItems" class="space-y-2"></div>
+                    <button
+                        type="submit"
+                        class="mt-4 w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 btn-bounce"
+                    >
+                        <i class="fas fa-upload mr-2"></i>
+                        Upload All Files
+                    </button>
+                </div>
             </form>
         </div>
 
-        <!-- Search & Filter -->
-        <div class="p-6 rounded-xl shadow-xl mb-8" style="background-color: var(--bg-secondary);">
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="flex-1">
+        <!-- Search & Filter Section -->
+        <div class="bg-card rounded-xl shadow-lg p-6 mb-6 border">
+            <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+                <!-- Search Bar -->
+                <div class="flex-1 w-full lg:max-w-md">
                     <div class="relative">
-                        <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                         <input
                             type="text"
                             id="searchInput"
                             placeholder="Search files..."
-                            class="w-full pl-12 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);"
+                            class="search-input w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                         >
                     </div>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="filterFiles('all')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-all hover:scale-105" style="background-color: var(--bg-primary);">
+
+                <!-- Filter & Sort Controls -->
+                <div class="flex flex-wrap gap-2 items-center">
+                    <span class="text-sm text-muted font-medium mr-2">Filter:</span>
+                    <button class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium border" data-filter="all">
                         All
                     </button>
-                    <button onclick="filterFiles('images')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-all hover:scale-105" style="background-color: var(--bg-primary);">
+                    <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium border" data-filter="image">
                         <i class="fas fa-image mr-1"></i> Images
                     </button>
-                    <button onclick="filterFiles('docs')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-all hover:scale-105" style="background-color: var(--bg-primary);">
+                    <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium border" data-filter="document">
                         <i class="fas fa-file-alt mr-1"></i> Docs
                     </button>
-                    <button onclick="filterFiles('other')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-all hover:scale-105" style="background-color: var(--bg-primary);">
-                        <i class="fas fa-ellipsis-h mr-1"></i> Other
+                    <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium border" data-filter="other">
+                        <i class="fas fa-file mr-1"></i> Other
                     </button>
-                </div>
-                <select id="sortSelect" class="px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);">
-                    <option value="name-asc">Name (A-Z)</option>
-                    <option value="name-desc">Name (Z-A)</option>
-                    <option value="size-asc">Size (Small-Large)</option>
-                    <option value="size-desc">Size (Large-Small)</option>
-                    <option value="date-asc">Date (Old-New)</option>
-                    <option value="date-desc">Date (New-Old)</option>
+
+                    <span class="text-sm text-muted font-medium ml-4 mr-2">Sort:</span>
+                    <select id="sortSelect" class="search-input px-4 py-2 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="size-asc">Size (Small)</option>
+                        <option value="size-desc">Size (Large)</option>
+                        <option value="date-desc">Date (Newest)</option>
+                        <option value="date-asc">Date (Oldest)</option>
                 </select>
             </div>
         </div>
@@ -384,38 +541,73 @@
     </div>
 
     <script>
-        // Dark Mode Toggle
+        // ============ DARK MODE ============
         const darkModeToggle = document.getElementById('darkModeToggle');
-        const html = document.documentElement;
-        const icon = darkModeToggle.querySelector('i');
+        const body = document.body;
 
-        // Check saved preference
-        if (localStorage.getItem('darkMode') === 'true') {
-            html.classList.add('dark');
-            icon.classList.remove('fa-moon');
-            icon.classList.add('fa-sun');
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
         }
 
-        darkModeToggle.addEventListener('click', () => {
-            html.classList.toggle('dark');
-            const isDark = html.classList.contains('dark');
-            localStorage.setItem('darkMode', isDark);
-
-            if (isDark) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
+        darkModeToggle.addEventListener('change', () => {
+            if (darkModeToggle.checked) {
+                body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'enabled');
             } else {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
+                body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'disabled');
             }
         });
 
-        // Drag & Drop
-        const dropZone = document.getElementById('dropZone');
+        // ============ FILE UPLOAD ============
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
-        const uploadBtn = document.getElementById('uploadBtn');
+        const fileItems = document.getElementById('fileItems');
+        const dropZone = document.getElementById('dropZone');
 
+        fileInput.addEventListener('change', updateFileList);
+
+        function updateFileList() {
+            const files = fileInput.files;
+            if (files.length === 0) {
+                fileList.classList.add('hidden');
+                return;
+            }
+
+            fileList.classList.remove('hidden');
+            fileItems.innerHTML = '';
+
+            Array.from(files).forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-3 rounded-lg';
+                fileItem.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-file text-purple-500"></i>
+                        <span class="text-sm font-medium text-card">${file.name}</span>
+                        <span class="text-xs text-muted">(${(file.size / 1024).toFixed(2)} KB)</span>
+                    </div>
+                    <button type="button" onclick="removeFile(${index})" class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                fileItems.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index) {
+            const dt = new DataTransfer();
+            const files = fileInput.files;
+
+            for (let i = 0; i < files.length; i++) {
+                if (i !== index) dt.items.add(files[i]);
+            }
+
+            fileInput.files = dt.files;
+            updateFileList();
+        }
+
+        // Drag and drop
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);
         });
@@ -426,46 +618,23 @@
         }
 
         ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add('drag-over');
+            }, false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('drag-over');
+            }, false);
         });
 
         dropZone.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
             const files = dt.files;
             fileInput.files = files;
-            displayFiles(files);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            displayFiles(e.target.files);
-        });
-
-        function displayFiles(files) {
-            fileList.innerHTML = '';
-            if (files.length > 0) {
-                uploadBtn.disabled = false;
-                Array.from(files).forEach((file, index) => {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'flex items-center justify-between p-3 rounded-lg';
-                    fileItem.style.backgroundColor = 'var(--bg-primary)';
-                    fileItem.innerHTML = `
-                        <div class="flex items-center">
-                            <i class="fas fa-file mr-3" style="color: var(--accent-color);"></i>
-                            <span>${file.name}</span>
-                            <span class="ml-3 text-sm" style="color: var(--text-secondary);">(${(file.size / 1024).toFixed(2)} KB)</span>
-                        </div>
-                        <i class="fas fa-check-circle text-green-500"></i>
-                    `;
-                    fileList.appendChild(fileItem);
-                });
-            } else {
-                uploadBtn.disabled = true;
-            }
-        }
+            updateFileList();
+        }, false);
 
         // Search & Filter
         const searchInput = document.getElementById('searchInput');
@@ -534,6 +703,15 @@
             document.getElementById('lightbox').classList.remove('flex');
         }
     </script>
+
+    <!-- Footer -->
+    <footer class="bg-card border-t mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="text-center text-muted text-sm">
+                <p>CloudBox - Powered by Amazon S3 &amp; Node.js</p>
+            </div>
+        </div>
+    </footer>
 
 </body>
 </html>
