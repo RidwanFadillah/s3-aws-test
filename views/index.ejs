@@ -3,91 +3,537 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S3 File Uploader</title>
+    <title>CloudBox - S3 Storage Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { font-family: 'Inter', sans-serif; }
+
+        :root {
+            --bg-primary: #f9fafb;
+            --bg-secondary: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --accent-color: #3b82f6;
+        }
+
+        .dark {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --border-color: #374151;
+            --accent-color: #60a5fa;
+        }
+
+        .drag-over {
+            border-color: #3b82f6 !important;
+            background-color: #dbeafe !important;
+        }
+
+        .file-card {
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .file-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast {
+            animation: toast-in 0.3s ease-out;
+        }
+
+        @keyframes toast-in {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-card-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .badge-image { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .badge-pdf { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .badge-doc { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .badge-excel { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .badge-ppt { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .badge-video { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        .badge-audio { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .badge-archive { background: linear-gradient(135deg, #ff9a56 0%, #ffecd2 100%); }
+        .badge-code { background: linear-gradient(135deg, #21d4fd 0%, #b721ff 100%); }
+        .badge-default { background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%); }
+    </style>
 </head>
-<body class="font-sans antialiased">
+<body class="font-sans antialiased transition-colors duration-300" style="background-color: var(--bg-primary); color: var(--text-primary);">
 
-    <div class="max-w-3xl mx-auto my-10 p-8 bg-white rounded-lg shadow-2xl">
+    <!-- Dark Mode Toggle -->
+    <div class="fixed top-4 right-4 z-50">
+        <button id="darkModeToggle" class="p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110" style="background-color: var(--bg-secondary);">
+            <i class="fas fa-moon text-xl" style="color: var(--text-primary);"></i>
+        </button>
+    </div>
 
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 pb-3 border-b border-gray-200">
-            📦 S3 File Uploader
-        </h1>
+    <div class="max-w-7xl mx-auto my-10 p-8">
 
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent animate-pulse">
+                <i class="fas fa-cloud-upload-alt"></i> CloudBox
+            </h1>
+            <p class="text-lg" style="color: var(--text-secondary);">Your Modern S3 Storage Manager</p>
+        </div>
+
+        <!-- Toast Messages -->
         <% if (messages.error && messages.error.length > 0) { %>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
-                <span class="block sm:inline"><%= messages.error[0] %></span>
+            <div class="toast bg-red-100 border-l-4 border-red-500 text-red-700 px-6 py-4 rounded-lg mb-6 shadow-lg" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle mr-3 text-2xl"></i>
+                    <span class="font-medium"><%= messages.error[0] %></span>
+                </div>
             </div>
         <% } %>
         <% if (messages.success && messages.success.length > 0) { %>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
-                <span class="block sm:inline"><%= messages.success[0] %></span>
+            <div class="toast bg-green-100 border-l-4 border-green-500 text-green-700 px-6 py-4 rounded-lg mb-6 shadow-lg" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-3 text-2xl"></i>
+                    <span class="font-medium"><%= messages.success[0] %></span>
+                </div>
             </div>
+            <script>
+                // Trigger confetti on success
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            </script>
         <% } %>
 
-        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Upload File Baru</h2>
+        <!-- Statistics Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="stat-card p-6 rounded-xl shadow-lg text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm opacity-90">Total Files</p>
+                        <p class="text-3xl font-bold" id="totalFiles"><%= files.length %></p>
+                    </div>
+                    <i class="fas fa-file text-4xl opacity-50"></i>
+                </div>
+            </div>
+            <div class="stat-card-2 p-6 rounded-xl shadow-lg text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm opacity-90">Total Size</p>
+                        <p class="text-3xl font-bold" id="totalSize">
+                            <%
+                                const totalBytes = files.reduce((sum, f) => sum + (f.Size || 0), 0);
+                                const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
+                            %>
+                            <%= totalMB %> MB
+                        </p>
+                    </div>
+                    <i class="fas fa-database text-4xl opacity-50"></i>
+                </div>
+            </div>
+            <div class="stat-card-3 p-6 rounded-xl shadow-lg text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm opacity-90">Images</p>
+                        <p class="text-3xl font-bold" id="imageCount">
+                            <%
+                                const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+                                const imageCount = files.filter(f => imageExts.some(ext => f.Key.toLowerCase().endsWith(ext))).length;
+                            %>
+                            <%= imageCount %>
+                        </p>
+                    </div>
+                    <i class="fas fa-image text-4xl opacity-50"></i>
+                </div>
+            </div>
+        </div>
 
-        <form action="/upload" method="post" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-4 mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-            <input
-                type="file"
-                name="files"
-                multiple
-                required
-                class="flex-grow block w-full text-sm text-gray-500
-                       file:mr-4 file:py-2 file:px-4
-                       file:rounded-full file:border-0
-                       file:text-sm file:font-semibold
-                       file:bg-blue-50 file:text-blue-700
-                       hover:file:bg-blue-100 cursor-pointer"
-            >
-            <button
-                type="submit"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-200 ease-in-out"
-            >
-                Upload
-            </button>
-        </form>
+        <!-- Upload Section -->
+        <div class="p-8 rounded-xl shadow-xl mb-8" style="background-color: var(--bg-secondary);">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-upload mr-3 text-blue-600"></i>
+                Upload Files
+            </h2>
 
-        <hr class="border-gray-200 my-8">
+            <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                <div id="dropZone" class="border-3 border-dashed rounded-xl p-12 text-center transition-all duration-300" style="border-color: var(--border-color);">
+                    <i class="fas fa-cloud-upload-alt text-6xl mb-4" style="color: var(--accent-color);"></i>
+                    <p class="text-xl font-semibold mb-2">Drag & Drop files here</p>
+                    <p class="mb-4" style="color: var(--text-secondary);">or click to select files (max 10 files)</p>
+                    <input
+                        type="file"
+                        name="files"
+                        id="fileInput"
+                        multiple
+                        accept="*/*"
+                        class="hidden"
+                    >
+                    <label for="fileInput" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg cursor-pointer transition-all duration-300 hover:scale-105">
+                        <i class="fas fa-folder-open mr-2"></i> Choose Files
+                    </label>
+                </div>
 
-        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Daftar File di Bucket</h2>
+                <div id="fileList" class="mt-4 space-y-2"></div>
 
-        <ul class="space-y-3">
-            <% if (files.length > 0) { %>
-                <% files.forEach(file => { %>
-                    <%
-                        const fileUrl = `https://${bucket}.s3.${region}.amazonaws.com/${file.Key}`
-                    %>
-                    <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm gap-2">
+                <button
+                    type="submit"
+                    id="uploadBtn"
+                    class="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled
+                >
+                    <i class="fas fa-rocket mr-2"></i> Upload Files
+                </button>
+            </form>
+        </div>
 
-                        <div class="flex-grow">
-                            <a href="<%= fileUrl %>" target="_blank" class="text-blue-600 hover:underline font-medium break-all">
-                                <%= file.Key %>
-                            </a>
-                            <span class="block text-sm text-gray-500">
-                                <%= (file.Size / 1024).toFixed(2) %> KB
-                            </span>
+        <!-- Search & Filter -->
+        <div class="p-6 rounded-xl shadow-xl mb-8" style="background-color: var(--bg-secondary);">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search files..."
+                            class="w-full pl-12 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);"
+                        >
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="filterFiles('all')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-all hover:scale-105" style="background-color: var(--bg-primary);">
+                        All
+                    </button>
+                    <button onclick="filterFiles('images')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-all hover:scale-105" style="background-color: var(--bg-primary);">
+                        <i class="fas fa-image mr-1"></i> Images
+                    </button>
+                    <button onclick="filterFiles('docs')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-all hover:scale-105" style="background-color: var(--bg-primary);">
+                        <i class="fas fa-file-alt mr-1"></i> Docs
+                    </button>
+                    <button onclick="filterFiles('other')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-all hover:scale-105" style="background-color: var(--bg-primary);">
+                        <i class="fas fa-ellipsis-h mr-1"></i> Other
+                    </button>
+                </div>
+                <select id="sortSelect" class="px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);">
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="size-asc">Size (Small-Large)</option>
+                    <option value="size-desc">Size (Large-Small)</option>
+                    <option value="date-asc">Date (Old-New)</option>
+                    <option value="date-desc">Date (New-Old)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Files Grid -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-folder-open mr-3 text-blue-600"></i>
+                Your Files (<span id="fileCount"><%= files.length %></span>)
+            </h2>
+
+            <div id="filesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <% if (files.length > 0) { %>
+                    <% files.forEach(file => { %>
+                        <%
+                            const fileUrl = `https://${bucket}.s3.${region}.amazonaws.com/${encodeURIComponent(file.Key)}`;
+                            const fileName = file.Key;
+                            const fileExt = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+
+                            let badgeClass = 'badge-default';
+                            let fileIcon = 'fa-file';
+                            let fileType = 'other';
+
+                            const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+                            const docExts = ['.pdf', '.doc', '.docx', '.txt'];
+
+                            if (imageExts.includes(fileExt)) {
+                                badgeClass = 'badge-image';
+                                fileIcon = 'fa-image';
+                                fileType = 'images';
+                            } else if (fileExt === '.pdf') {
+                                badgeClass = 'badge-pdf';
+                                fileIcon = 'fa-file-pdf';
+                                fileType = 'docs';
+                            } else if (['.doc', '.docx'].includes(fileExt)) {
+                                badgeClass = 'badge-doc';
+                                fileIcon = 'fa-file-word';
+                                fileType = 'docs';
+                            } else if (['.xls', '.xlsx'].includes(fileExt)) {
+                                badgeClass = 'badge-excel';
+                                fileIcon = 'fa-file-excel';
+                                fileType = 'docs';
+                            } else if (['.ppt', '.pptx'].includes(fileExt)) {
+                                badgeClass = 'badge-ppt';
+                                fileIcon = 'fa-file-powerpoint';
+                                fileType = 'docs';
+                            } else if (['.mp4', '.avi', '.mov'].includes(fileExt)) {
+                                badgeClass = 'badge-video';
+                                fileIcon = 'fa-file-video';
+                            } else if (['.mp3', '.wav', '.flac'].includes(fileExt)) {
+                                badgeClass = 'badge-audio';
+                                fileIcon = 'fa-file-audio';
+                            } else if (['.zip', '.rar', '.7z'].includes(fileExt)) {
+                                badgeClass = 'badge-archive';
+                                fileIcon = 'fa-file-archive';
+                            } else if (['.js', '.html', '.css', '.py', '.java', '.cpp'].includes(fileExt)) {
+                                badgeClass = 'badge-code';
+                                fileIcon = 'fa-file-code';
+                            }
+                        %>
+
+                        <div class="file-card p-6 rounded-xl shadow-lg" style="background-color: var(--bg-secondary);" data-filename="<%= fileName.toLowerCase() %>" data-filetype="<%= fileType %>">
+                            <!-- Image Preview for images -->
+                            <% if (imageExts.includes(fileExt)) { %>
+                                <div class="mb-4 rounded-lg overflow-hidden h-48 bg-gray-100 flex items-center justify-center cursor-pointer" onclick="openLightbox('<%= fileUrl %>')">
+                                    <img src="<%= fileUrl %>" alt="<%= fileName %>" class="max-h-full max-w-full object-contain hover:scale-110 transition-transform duration-300">
+                                </div>
+                            <% } else { %>
+                                <div class="mb-4 rounded-lg h-48 flex items-center justify-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <i class="fas <%= fileIcon %> text-7xl text-white opacity-80"></i>
+                                </div>
+                            <% } %>
+
+                            <div class="mb-3">
+                                <span class="<%= badgeClass %> text-white text-xs font-bold px-3 py-1 rounded-full">
+                                    <%= fileExt.substring(1).toUpperCase() %>
+                                </span>
+                            </div>
+
+                            <h3 class="font-bold text-lg mb-2 truncate" title="<%= fileName %>">
+                                <%= fileName %>
+                            </h3>
+
+                            <p class="text-sm mb-4" style="color: var(--text-secondary);">
+                                <i class="fas fa-hdd mr-1"></i> <%= (file.Size / 1024).toFixed(2) %> KB
+                            </p>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="<%= fileUrl %>" target="_blank" class="text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all hover:scale-105 text-sm">
+                                    <i class="fas fa-external-link-alt"></i> View
+                                </a>
+                                <button onclick="copyLink('<%= fileUrl %>')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all hover:scale-105 text-sm">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <a href="<%= fileUrl %>" download class="text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-all hover:scale-105 text-sm">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                                <form action="/delete" method="POST" class="inline" onsubmit="return confirm('Delete <%= fileName %>?')">
+                                    <input type="hidden" name="fileKey" value="<%= file.Key %>">
+                                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-all hover:scale-105 text-sm">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-
-                        <form action="/delete" method="POST" class="flex-shrink-0">
-                            <input type="hidden" name="fileKey" value="<%= file.Key %>">
-                            <button
-                                type="submit"
-                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-lg text-sm transition duration-200"
-                                onclick="return confirm('Yakin ingin menghapus <%= file.Key %>?')"
-                            >
-                                Delete
-                            </button>
-                        </form>
-
-                    </li>
-                <% }) %>
-            <% } else { %>
-                <li class="text-gray-500 text-center py-4">Tidak ada file di bucket.</li>
-            <% } %>
-        </ul>
-
+                    <% }) %>
+                <% } else { %>
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-inbox text-6xl mb-4" style="color: var(--text-secondary);"></i>
+                        <p class="text-xl" style="color: var(--text-secondary);">No files yet. Upload your first file!</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
     </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-90 hidden items-center justify-center z-50" onclick="closeLightbox()">
+        <div class="relative max-w-7xl max-h-screen p-4">
+            <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-4xl hover:text-gray-300">
+                <i class="fas fa-times"></i>
+            </button>
+            <img id="lightboxImg" src="" alt="" class="max-w-full max-h-screen object-contain">
+        </div>
+    </div>
+
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+        const icon = darkModeToggle.querySelector('i');
+
+        // Check saved preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            html.classList.add('dark');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+
+            if (isDark) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+
+        // Drag & Drop
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            displayFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            displayFiles(e.target.files);
+        });
+
+        function displayFiles(files) {
+            fileList.innerHTML = '';
+            if (files.length > 0) {
+                uploadBtn.disabled = false;
+                Array.from(files).forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'flex items-center justify-between p-3 rounded-lg';
+                    fileItem.style.backgroundColor = 'var(--bg-primary)';
+                    fileItem.innerHTML = `
+                        <div class="flex items-center">
+                            <i class="fas fa-file mr-3" style="color: var(--accent-color);"></i>
+                            <span>${file.name}</span>
+                            <span class="ml-3 text-sm" style="color: var(--text-secondary);">(${(file.size / 1024).toFixed(2)} KB)</span>
+                        </div>
+                        <i class="fas fa-check-circle text-green-500"></i>
+                    `;
+                    fileList.appendChild(fileItem);
+                });
+            } else {
+                uploadBtn.disabled = true;
+            }
+        }
+
+        // Search & Filter
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        let currentFilter = 'all';
+
+        searchInput.addEventListener('input', filterAndSort);
+        sortSelect.addEventListener('change', filterAndSort);
+
+        function filterFiles(type) {
+            currentFilter = type;
+            filterAndSort();
+        }
+
+        function filterAndSort() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const sortValue = sortSelect.value;
+            const cards = Array.from(document.querySelectorAll('.file-card'));
+
+            cards.forEach(card => {
+                const fileName = card.dataset.filename;
+                const fileType = card.dataset.filetype;
+
+                const matchesSearch = fileName.includes(searchTerm);
+                const matchesFilter = currentFilter === 'all' || fileType === currentFilter;
+
+                card.style.display = matchesSearch && matchesFilter ? 'block' : 'none';
+            });
+
+            // Sort
+            const visibleCards = cards.filter(card => card.style.display !== 'none');
+            const grid = document.getElementById('filesGrid');
+
+            visibleCards.sort((a, b) => {
+                const aName = a.dataset.filename;
+                const bName = b.dataset.filename;
+
+                if (sortValue === 'name-asc') return aName.localeCompare(bName);
+                if (sortValue === 'name-desc') return bName.localeCompare(aName);
+                // Add more sort options as needed
+
+                return 0;
+            });
+
+            visibleCards.forEach(card => grid.appendChild(card));
+
+            document.getElementById('fileCount').textContent = visibleCards.length;
+        }
+
+        // Copy Link
+        function copyLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Link copied to clipboard!');
+            });
+        }
+
+        // Lightbox
+        function openLightbox(url) {
+            document.getElementById('lightbox').classList.remove('hidden');
+            document.getElementById('lightbox').classList.add('flex');
+            document.getElementById('lightboxImg').src = url;
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+            document.getElementById('lightbox').classList.remove('flex');
+        }
+    </script>
 
 </body>
 </html>
