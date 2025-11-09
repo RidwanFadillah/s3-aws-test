@@ -78,29 +78,47 @@ app.get('/', async (req, res) => {
     }
 });
 
-// Rute POST (upload) - Tidak berubah
-app.post('/upload', upload.single('file'), async (req, res) => {
-    if (!req.file) {
+// Rute POST (upload) - Support multiple files
+app.post('/upload', upload.array('files', 10), async (req, res) => {
+    if (!req.files || req.files.length === 0) {
         req.flash('error', 'Tidak ada file yang dipilih untuk di-upload.');
         return res.redirect('/');
     }
-    const params = {
-        Bucket: YOUR_BUCKET_NAME,
-        Key: req.file.originalname,
-        Body: req.file.buffer,
-        ContentType: req.file.mimetype
-    };
-    try {
-        const upload = new Upload({
-            client: s3Client,
-            params: params
-        });
-        await upload.done();
-        req.flash('success', `File "${req.file.originalname}" berhasil di-upload!`);
-    } catch (err) {
-        console.error('Error mengunggah ke S3:', err);
-        req.flash('error', `Gagal mengunggah file: ${err.message}`);
+
+    let successCount = 0;
+    let failedFiles = [];
+
+    // Upload semua file secara paralel
+    const uploadPromises = req.files.map(async (file) => {
+        const params = {
+            Bucket: YOUR_BUCKET_NAME,
+            Key: file.originalname,
+            Body: file.buffer,
+            ContentType: file.mimetype
+        };
+        try {
+            const upload = new Upload({
+                client: s3Client,
+                params: params
+            });
+            await upload.done();
+            successCount++;
+        } catch (err) {
+            console.error(`Error mengunggah ${file.originalname}:`, err);
+            failedFiles.push(file.originalname);
+        }
+    });
+
+    await Promise.all(uploadPromises);
+
+    // Beri feedback berdasarkan hasil
+    if (successCount > 0) {
+        req.flash('success', `${successCount} file berhasil di-upload!`);
     }
+    if (failedFiles.length > 0) {
+        req.flash('error', `Gagal mengunggah: ${failedFiles.join(', ')}`);
+    }
+
     res.redirect('/');
 });
 
