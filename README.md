@@ -261,7 +261,7 @@ s3-aws-test/
 │   └── workflows/
 │       └── deploy.yml          # CI/CD workflow
 ├── assets/
-│   └── 1.png                   # Screenshot
+│   └── view.png                   # Screenshot
 ├── views/
 │   └── index.ejs               # Main template
 ├── node_modules/
