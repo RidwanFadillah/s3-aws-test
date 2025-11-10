@@ -2,7 +2,7 @@
 
 Aplikasi cloud storage modern yang memungkinkan pengguna untuk mengunggah, melihat, dan mengelola file di Amazon S3 dengan antarmuka yang menarik dan fitur-fitur canggih.
 
-![Screenshot Aplikasi](./assets/1.png)
+![Screenshot Aplikasi](./assets/view.png)
 
 ---
 
