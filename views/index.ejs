@@ -443,23 +443,23 @@
                             if (imageExts.includes(fileExt)) {
                                 badgeClass = 'badge-image';
                                 fileIcon = 'fa-image';
-                                fileType = 'images';
+                                fileType = 'image';
                             } else if (fileExt === '.pdf') {
                                 badgeClass = 'badge-pdf';
                                 fileIcon = 'fa-file-pdf';
-                                fileType = 'docs';
+                                fileType = 'document';
                             } else if (['.doc', '.docx'].includes(fileExt)) {
                                 badgeClass = 'badge-doc';
                                 fileIcon = 'fa-file-word';
-                                fileType = 'docs';
+                                fileType = 'document';
                             } else if (['.xls', '.xlsx'].includes(fileExt)) {
                                 badgeClass = 'badge-excel';
                                 fileIcon = 'fa-file-excel';
-                                fileType = 'docs';
+                                fileType = 'document';
                             } else if (['.ppt', '.pptx'].includes(fileExt)) {
                                 badgeClass = 'badge-ppt';
                                 fileIcon = 'fa-file-powerpoint';
-                                fileType = 'docs';
+                                fileType = 'document';
                             } else if (['.mp4', '.avi', '.mov'].includes(fileExt)) {
                                 badgeClass = 'badge-video';
                                 fileIcon = 'fa-file-video';
@@ -475,7 +475,11 @@
                             }
                         %>
 
-                        <div class="file-card p-6 rounded-xl shadow-lg" style="background-color: var(--bg-secondary);" data-filename="<%= fileName.toLowerCase() %>" data-filetype="<%= fileType %>">
+                        <div class="file-card p-6 rounded-xl shadow-lg" style="background-color: var(--bg-secondary);"
+                             data-filename="<%= fileName.toLowerCase() %>"
+                             data-filetype="<%= fileType %>"
+                             data-size="<%= file.Size %>"
+                             data-date="<%= file.LastModified ? new Date(file.LastModified).toISOString() : '' %>">
                             <!-- Image Preview for images -->
                             <% if (imageExts.includes(fileExt)) { %>
                                 <div class="mb-4 rounded-lg overflow-hidden h-48 bg-gray-100 flex items-center justify-center cursor-pointer" onclick="openLightbox('<%= fileUrl %>')">
@@ -636,18 +640,23 @@
             updateFileList();
         }, false);
 
-        // Search & Filter
+        // ============ SEARCH & FILTER ============
         const searchInput = document.getElementById('searchInput');
+        const filterBtns = document.querySelectorAll('.filter-btn');
         const sortSelect = document.getElementById('sortSelect');
         let currentFilter = 'all';
 
         searchInput.addEventListener('input', filterAndSort);
         sortSelect.addEventListener('change', filterAndSort);
 
-        function filterFiles(type) {
-            currentFilter = type;
-            filterAndSort();
-        }
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                filterAndSort();
+            });
+        });
 
         function filterAndSort() {
             const searchTerm = searchInput.value.toLowerCase();
@@ -669,19 +678,28 @@
             const grid = document.getElementById('filesGrid');
 
             visibleCards.sort((a, b) => {
-                const aName = a.dataset.filename;
-                const bName = b.dataset.filename;
+                const [sortBy, order] = sortValue.split('-');
 
-                if (sortValue === 'name-asc') return aName.localeCompare(bName);
-                if (sortValue === 'name-desc') return bName.localeCompare(aName);
-                // Add more sort options as needed
+                let comparison = 0;
 
-                return 0;
+                if (sortBy === 'name') {
+                    comparison = a.dataset.filename.localeCompare(b.dataset.filename);
+                } else if (sortBy === 'size') {
+                    comparison = parseInt(a.dataset.size) - parseInt(b.dataset.size);
+                } else if (sortBy === 'date') {
+                    comparison = new Date(a.dataset.date) - new Date(b.dataset.date);
+                }
+
+                return order === 'asc' ? comparison : -comparison;
             });
 
             visibleCards.forEach(card => grid.appendChild(card));
 
-            document.getElementById('fileCount').textContent = visibleCards.length;
+            // Update visible count if element exists
+            const fileCountEl = document.getElementById('fileCount');
+            if (fileCountEl) {
+                fileCountEl.textContent = visibleCards.length;
+            }
         }
 
         // Copy Link
